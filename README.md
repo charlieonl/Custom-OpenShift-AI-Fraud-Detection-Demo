@@ -55,8 +55,7 @@ models/fraud/1/model.onnx
 models/fraud/2/model.onnx
 ```
 
-The v2 model is 85% less sensitive to `distance_from_last_transaction`
-by reducing that fitted logistic-regression coefficient to 15% of its v1 value.
+The v1 model is 85% less sensitive to `distance_from_last_transaction` than the fitted baseline. The v2 model restores the full fitted distance coefficient, making the new model more sensitive to that fraud signal.
 
 ## OpenShift AI model deployment
 
