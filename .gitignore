@@ -1,0 +1,16 @@
+# Generated model artifacts
+models/
+artifact/
+
+# Downloaded training data
+data/*.csv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

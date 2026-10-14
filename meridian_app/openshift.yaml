@@ -1,0 +1,102 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: meridian-fraud-demo
+  namespace: fraud-detection
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: meridian-fraud-demo
+  namespace: fraud-detection
+spec:
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  output:
+    to:
+      kind: ImageStreamTag
+      name: meridian-fraud-demo:latest
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meridian-fraud-demo
+  namespace: fraud-detection
+  labels:
+    app: meridian-fraud-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meridian-fraud-demo
+  template:
+    metadata:
+      labels:
+        app: meridian-fraud-demo
+    spec:
+      containers:
+        - name: meridian-fraud-demo
+          image: image-registry.openshift-image-registry.svc:5000/fraud-detection/meridian-fraud-demo:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: APP_HOST
+              value: 0.0.0.0
+            - name: APP_PORT
+              value: "8080"
+            - name: MODEL_NAME
+              value: fraud-detection-deploy
+            - name: MODEL_HOST
+              value: http://fraud-detection-deploy-predictor.fraud-detection.svc.cluster.local:8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: meridian-fraud-demo
+  namespace: fraud-detection
+spec:
+  selector:
+    app: meridian-fraud-demo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: meridian-fraud-demo
+  namespace: fraud-detection
+spec:
+  to:
+    kind: Service
+    name: meridian-fraud-demo
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
