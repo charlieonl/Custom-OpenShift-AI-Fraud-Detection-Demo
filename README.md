@@ -2,6 +2,8 @@
 
 This folder contains only the files needed for the reusable Meridian Financial demo.
 
+It is meant to be run with an "AI-Ready OpenShift on IBM Power" cluster reservation from IBM Tech Zone.
+
 ## Folder structure
 
 ```text
